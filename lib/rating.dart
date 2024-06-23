@@ -19,3 +19,16 @@ Future<int> ratingOfUser(String user) async {
     return -1;
   }
 }
+
+Future<int> ratingOfUserLeetcode(String user) async {
+  String url = "https://leetcode.com/$user";
+  final response = await http.get(Uri.parse(url));
+  if (response.statusCode == 200) {
+    var list = json.decode(response.body);
+    int newRating = list['rating'];
+    return newRating;
+  } else {
+    // throw Exception('Failed to load Data');
+    return -1;
+  }
+}

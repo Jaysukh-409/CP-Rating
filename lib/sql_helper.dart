@@ -5,16 +5,22 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
 
 class SQLHelper {
+  // Creates Tables: For each CP platform
   static Future<void> createTables(sql.Database database) async {
-    await database.execute("""CREATE TABLE users(
+    await database.execute("""CREATE TABLE codeforces(
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        rating INTEGER,
+        username TEXT
+      )
+      """);
+
+    await database.execute("""CREATE TABLE leetcode(
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         rating INTEGER,
         username TEXT
       )
       """);
   }
-  // id : The ID of a user
-  // username : Handle of a user on Codeforces
 
   static Future<sql.Database> db() async {
     var databasesPath = await getDatabasesPath();
@@ -29,12 +35,12 @@ class SQLHelper {
   }
 
   // Create new User
-  static Future<int> createItem(String username) async {
+  static Future<int> createItem(String username, String table) async {
     final db = await SQLHelper.db();
     final rating = await ratingOfUser(username);
     final data = {'username': username, 'rating': rating};
     final id = await db.insert(
-      'users',
+      table,
       data,
       conflictAlgorithm: sql.ConflictAlgorithm.replace,
     );
@@ -42,34 +48,36 @@ class SQLHelper {
   }
 
   // Read all User
-  static Future<List<Map<String, dynamic>>> getItems() async {
+  static Future<List<Map<String, dynamic>>> getItems(String table) async {
     final db = await SQLHelper.db();
-    return db.query('users', orderBy: "rating DESC");
+    return db.query(table, orderBy: "rating DESC");
   }
 
   // Read a Single User data by ID
   // Currently didn't use but for future reference
-  static Future<List<Map<String, dynamic>>> getItem(int id) async {
+  static Future<List<Map<String, dynamic>>> getItem(
+      int id, String table) async {
     final db = await SQLHelper.db();
-    return db.query('users', where: "id = ?", whereArgs: [id], limit: 1);
+    return db.query(table, where: "id = ?", whereArgs: [id], limit: 1);
   }
 
   // Update an User by ID
-  static Future<int> updateItem(int id, String username) async {
+  static Future<int> updateItem(int id, String username, String table) async {
     final db = await SQLHelper.db();
+    // TODO: Update the rating of the user for the given platform
     final rating = await ratingOfUser(username);
     final data = {'username': username, 'rating': rating};
 
     final result =
-        await db.update('users', data, where: "id = ?", whereArgs: [id]);
+        await db.update(table, data, where: "id = ?", whereArgs: [id]);
     return result;
   }
 
   // Delete a User by ID
-  static Future<void> deleteItem(int id) async {
+  static Future<void> deleteItem(int id, String table) async {
     final db = await SQLHelper.db();
     try {
-      await db.delete("users", where: "id = ?", whereArgs: [id]);
+      await db.delete(table, where: "id = ?", whereArgs: [id]);
     } catch (err) {
       debugPrint("Something went wrong when deleting an item: $err");
     }

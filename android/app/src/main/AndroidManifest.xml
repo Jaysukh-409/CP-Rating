@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="cf_visualizer"
+        android:label="CP Rating"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
